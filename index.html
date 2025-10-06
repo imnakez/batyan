@@ -3,281 +3,519 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AR с камерой</title>
+    <title>Интерактивная 3D модель</title>
     <style>
-        body { 
-            margin: 0; 
-            padding: 0; 
-            font-family: Arial, sans-serif; 
-            overflow: hidden;
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            user-select: none;
         }
-        #ar-button { 
-            position: absolute;
-            top: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 100;
-            padding: 15px 30px; 
-            font-size: 18px; 
-            background: #007bff; 
-            color: white; 
-            border: none; 
-            border-radius: 5px; 
-            cursor: pointer; 
-        }
-        #ar-container { 
-            position: relative; 
-            width: 100vw; 
-            height: 100vh; 
-        }
-        #camera-view { 
-            width: 100%; 
-            height: 100%; 
-            object-fit: cover; 
-            display: none;
-        }
-        #model-container { 
-            position: absolute; 
-            top: 0; 
-            left: 0; 
-            width: 100%; 
-            height: 100%; 
-        }
-        #status {
-            position: absolute;
-            top: 80px;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 100;
+        
+        body {
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
             color: white;
-            background: rgba(0,0,0,0.7);
-            padding: 10px;
-            border-radius: 5px;
+            padding: 20px;
+            touch-action: manipulation;
+        }
+        
+        .container {
+            max-width: 800px;
+            width: 100%;
+            text-align: center;
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        
+        p {
+            font-size: 1.2rem;
+            margin-bottom: 30px;
+            opacity: 0.9;
+        }
+        
+        .btn {
+            background: #ff6b6b;
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.2rem;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            margin-bottom: 30px;
+            touch-action: manipulation;
+        }
+        
+        .btn:hover {
+            background: #ff5252;
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+        }
+        
+        .btn:active {
+            transform: translateY(1px);
+        }
+        
+        .camera-container {
+            width: 100%;
+            height: 500px;
+            background: rgba(0, 0, 0, 0.7);
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+            margin-top: 20px;
             display: none;
+            position: relative;
+            touch-action: none;
+        }
+        
+        .model-container {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            perspective: 1000px;
+            touch-action: none;
+        }
+        
+        .model {
+            width: 200px;
+            height: 200px;
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 0.1s;
+            touch-action: none;
+        }
+        
+        .face {
+            position: absolute;
+            width: 200px;
+            height: 200px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: white;
+            backface-visibility: visible;
+        }
+        
+        .front {
+            transform: translateZ(100px);
+            background: rgba(74, 144, 226, 0.7);
+        }
+        
+        .back {
+            transform: rotateY(180deg) translateZ(100px);
+            background: rgba(226, 74, 74, 0.7);
+        }
+        
+        .right {
+            transform: rotateY(90deg) translateZ(100px);
+            background: rgba(74, 226, 144, 0.7);
+        }
+        
+        .left {
+            transform: rotateY(-90deg) translateZ(100px);
+            background: rgba(226, 144, 74, 0.7);
+        }
+        
+        .top {
+            transform: rotateX(90deg) translateZ(100px);
+            background: rgba(144, 74, 226, 0.7);
+        }
+        
+        .bottom {
+            transform: rotateX(-90deg) translateZ(100px);
+            background: rgba(226, 226, 74, 0.7);
+        }
+        
+        .controls {
+            position: absolute;
+            bottom: 20px;
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            touch-action: manipulation;
+        }
+        
+        .control-btn {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(5px);
+            touch-action: manipulation;
+        }
+        
+        .control-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+        
+        .instructions {
+            margin-top: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 10px;
+            text-align: left;
+            max-width: 500px;
+        }
+        
+        .instructions h3 {
+            margin-bottom: 10px;
+        }
+        
+        .instructions ul {
+            padding-left: 20px;
+        }
+        
+        .instructions li {
+            margin-bottom: 8px;
+        }
+        
+        .mobile-hint {
+            display: none;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 10px;
+            border-radius: 10px;
+            margin-top: 10px;
+            font-size: 0.9rem;
+        }
+        
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2rem;
+            }
+            
+            p {
+                font-size: 1rem;
+            }
+            
+            .camera-container {
+                height: 400px;
+            }
+            
+            .model {
+                width: 150px;
+                height: 150px;
+            }
+            
+            .face {
+                width: 150px;
+                height: 150px;
+                font-size: 1.2rem;
+            }
+            
+            .front, .back, .right, .left, .top, .bottom {
+                transform-origin: center;
+            }
+            
+            .front {
+                transform: translateZ(75px);
+            }
+            
+            .back {
+                transform: rotateY(180deg) translateZ(75px);
+            }
+            
+            .right {
+                transform: rotateY(90deg) translateZ(75px);
+            }
+            
+            .left {
+                transform: rotateY(-90deg) translateZ(75px);
+            }
+            
+            .top {
+                transform: rotateX(90deg) translateZ(75px);
+            }
+            
+            .bottom {
+                transform: rotateX(-90deg) translateZ(75px);
+            }
+            
+            .mobile-hint {
+                display: block;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .camera-container {
+                height: 350px;
+            }
+            
+            .model {
+                width: 120px;
+                height: 120px;
+            }
+            
+            .face {
+                width: 120px;
+                height: 120px;
+                font-size: 1rem;
+            }
+            
+            .front {
+                transform: translateZ(60px);
+            }
+            
+            .back {
+                transform: rotateY(180deg) translateZ(60px);
+            }
+            
+            .right {
+                transform: rotateY(90deg) translateZ(60px);
+            }
+            
+            .left {
+                transform: rotateY(-90deg) translateZ(60px);
+            }
+            
+            .top {
+                transform: rotateX(90deg) translateZ(60px);
+            }
+            
+            .bottom {
+                transform: rotateX(-90deg) translateZ(60px);
+            }
         }
     </style>
 </head>
 <body>
-    <div id="ar-container">
-        <video id="camera-view" autoplay playsinline></video>
-        <div id="model-container"></div>
-        <div id="status">Загрузка...</div>
+    <div class="container">
+        <h1>Интерактивная 3D модель</h1>
+        <p>Нажмите на кнопку, чтобы открыть камеру с 3D моделью</p>
+        
+        <button class="btn" id="openCameraBtn">Открыть камеру</button>
+        
+        <div class="camera-container" id="cameraContainer">
+            <div class="model-container">
+                <div class="model" id="model">
+                    <div class="face front">Перед</div>
+                    <div class="face back">Зад</div>
+                    <div class="face right">Прав</div>
+                    <div class="face left">Лев</div>
+                    <div class="face top">Верх</div>
+                    <div class="face bottom">Низ</div>
+                </div>
+            </div>
+            
+            <div class="controls">
+                <button class="control-btn" id="resetBtn">Сбросить</button>
+                <button class="control-btn" id="closeBtn">Закрыть</button>
+            </div>
+            
+            <div class="mobile-hint">
+                Используйте два пальца для масштабирования и один палец для вращения
+            </div>
+        </div>
+        
+        <div class="instructions">
+            <h3>Как управлять моделью:</h3>
+            <ul>
+                <li><strong>На компьютере:</strong> перетаскивайте мышью для вращения, колесо мыши для масштабирования</li>
+                <li><strong>На телефоне:</strong> одним пальцем вращайте, двумя пальцами масштабируйте</li>
+                <li>Нажмите "Сбросить" для возврата к исходному виду</li>
+            </ul>
+        </div>
     </div>
-    <button id="ar-button">Батян дизигнер</button>
 
-    <!-- Подключаем Three.js -->
-    <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/build/three.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/examples/js/loaders/GLTFLoader.js"></script>
-    
     <script>
-        // Глобальные переменные
-        let scene, camera, renderer, model;
-        let video, videoTexture;
-        let isInitialized = false;
-
-        // Инициализация Three.js сцены
-        function initThreeJS() {
-            try {
-                scene = new THREE.Scene();
-                
-                // Камера Three.js
-                camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-                camera.position.set(0, 0, 5);
-                
-                // Рендерер
-                renderer = new THREE.WebGLRenderer({ 
-                    alpha: true,
-                    antialias: true 
-                });
-                renderer.setSize(window.innerWidth, window.innerHeight);
-                renderer.setClearColor(0x000000, 0);
-                document.getElementById('model-container').appendChild(renderer.domElement);
-                
-                // Добавляем свет
-                const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
-                scene.add(ambientLight);
-                
-                const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
-                directionalLight.position.set(10, 10, 5);
-                scene.add(directionalLight);
-                
-                isInitialized = true;
-                console.log('Three.js инициализирован');
-                
-            } catch (error) {
-                console.error('Ошибка инициализации Three.js:', error);
-                updateStatus('Ошибка инициализации 3D');
-            }
-        }
-
-        // Загрузка 3D модели
-        function loadModel(modelUrl) {
-            updateStatus('Загрузка 3D модели...');
-            
-            const loader = new THREE.GLTFLoader();
-            
-            loader.load(modelUrl, 
-                // onLoad
-                function(gltf) {
-                    model = gltf.scene;
-                    model.scale.set(1, 1, 1);
-                    model.position.set(0, 0, -3);
-                    scene.add(model);
-                    updateStatus('Модель загружена');
-                    
-                    // Запускаем анимацию
-                    animate();
-                }, 
-                // onProgress
-                function(xhr) {
-                    const percent = (xhr.loaded / xhr.total * 100).toFixed(2);
-                    updateStatus(`Загрузка модели: ${percent}%`);
-                },
-                // onError
-                function(error) {
-                    console.error('Ошибка загрузки модели:', error);
-                    updateStatus('Ошибка загрузки модели');
-                }
-            );
-        }
-
-        // Запуск камеры устройства
-        async function startCamera() {
-            try {
-                updateStatus('Запрос доступа к камере...');
-                video = document.getElementById('camera-view');
-                
-                const stream = await navigator.mediaDevices.getUserMedia({ 
-                    video: { 
-                        facingMode: 'environment',
-                        width: { ideal: 1280 },
-                        height: { ideal: 720 }
-                    } 
-                });
-                
-                video.srcObject = stream;
-                video.style.display = 'block';
-                
-                // Ждем загрузки видео
-                await new Promise((resolve) => {
-                    video.onloadedmetadata = () => {
-                        video.play();
-                        resolve();
-                    };
-                });
-                
-                updateStatus('Камера активирована');
-                
-            } catch (error) {
-                console.error('Ошибка доступа к камере:', error);
-                updateStatus('Ошибка доступа к камере');
-                
-                // Пробуем использовать фронтальную камеру как запасной вариант
-                try {
-                    const stream = await navigator.mediaDevices.getUserMedia({ 
-                        video: true 
-                    });
-                    video.srcObject = stream;
-                    video.style.display = 'block';
-                    updateStatus('Используется фронтальная камера');
-                } catch (fallbackError) {
-                    console.error('Не удалось получить доступ ни к одной камере:', fallbackError);
-                    alert('Не удалось получить доступ к камере. Проверьте разрешения.');
-                }
-            }
-        }
-
-        // Обновление статуса
-        function updateStatus(message) {
-            const statusElement = document.getElementById('status');
-            statusElement.style.display = 'block';
-            statusElement.textContent = message;
-            
-            // Автоматически скрываем сообщение через 3 секунды
-            if (message.includes('загружена') || message.includes('активирована')) {
-                setTimeout(() => {
-                    statusElement.style.display = 'none';
-                }, 3000);
-            }
-        }
-
-        // Анимационный цикл
-        function animate() {
-            if (!isInitialized) return;
-            
-            requestAnimationFrame(animate);
-            
-            if (model) {
-                model.rotation.y += 0.01;
-            }
-            
-            if (renderer && scene && camera) {
-                renderer.render(scene, camera);
-            }
-        }
-
-        // Основная функция инициализации
-        async function initAR() {
-            const button = document.getElementById('ar-button');
-            button.disabled = true;
-            button.textContent = 'Загрузка...';
-            
-            updateStatus('Инициализация AR...');
-            
-            try {
-                // Инициализируем Three.js
-                initThreeJS();
-                
-                // Запускаем камеру
-                await startCamera();
-                
-                // Загружаем модель (можно заменить на вашу модель)
-                const modelUrl = 'https://modelviewer.dev/shared-assets/models/NeilArmstrong.glb';
-                loadModel(modelUrl);
-                
-                // Скрываем кнопку после успешного запуска
-                setTimeout(() => {
-                    button.style.display = 'none';
-                }, 2000);
-                
-            } catch (error) {
-                console.error('Ошибка инициализации AR:', error);
-                updateStatus('Ошибка инициализации AR');
-                button.disabled = false;
-                button.textContent = 'Попробовать снова';
-            }
-        }
-
-        // Обработчик изменения размера окна
-        function handleResize() {
-            if (!camera || !renderer) return;
-            
-            camera.aspect = window.innerWidth / window.innerHeight;
-            camera.updateProjectionMatrix();
-            renderer.setSize(window.innerWidth, window.innerHeight);
-        }
-
-        // Инициализация при загрузке страницы
         document.addEventListener('DOMContentLoaded', function() {
-            // Добавляем обработчики событий
-            document.getElementById('ar-button').addEventListener('click', initAR);
-            window.addEventListener('resize', handleResize);
+            const openCameraBtn = document.getElementById('openCameraBtn');
+            const cameraContainer = document.getElementById('cameraContainer');
+            const model = document.getElementById('model');
+            const resetBtn = document.getElementById('resetBtn');
+            const closeBtn = document.getElementById('closeBtn');
             
-            // Проверяем поддержку API
-            if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-                updateStatus('Ваш браузер не поддерживает доступ к камере');
+            let isDragging = false;
+            let previousMousePosition = {
+                x: 0,
+                y: 0
+            };
+            
+            // Для обработки мультитача
+            let initialDistance = null;
+            let initialScale = 1;
+            
+            let rotation = {
+                x: -20,
+                y: 20
+            };
+            
+            let scale = 1;
+            
+            // Открытие камеры
+            openCameraBtn.addEventListener('click', function() {
+                cameraContainer.style.display = 'block';
+                updateModelTransform();
+            });
+            
+            // Закрытие камеры
+            closeBtn.addEventListener('click', function() {
+                cameraContainer.style.display = 'none';
+            });
+            
+            // Сброс модели
+            resetBtn.addEventListener('click', function() {
+                rotation.x = -20;
+                rotation.y = 20;
+                scale = 1;
+                updateModelTransform();
+            });
+            
+            // Вращение модели мышью (для компьютера)
+            cameraContainer.addEventListener('mousedown', function(e) {
+                isDragging = true;
+                previousMousePosition = {
+                    x: e.clientX,
+                    y: e.clientY
+                };
+            });
+            
+            document.addEventListener('mousemove', function(e) {
+                if (isDragging) {
+                    const deltaX = e.clientX - previousMousePosition.x;
+                    const deltaY = e.clientY - previousMousePosition.y;
+                    
+                    rotation.y += deltaX * 0.5;
+                    rotation.x += deltaY * 0.5;
+                    
+                    previousMousePosition = {
+                        x: e.clientX,
+                        y: e.clientY
+                    };
+                    
+                    updateModelTransform();
+                }
+            });
+            
+            document.addEventListener('mouseup', function() {
+                isDragging = false;
+            });
+            
+            // Масштабирование колесом мыши (для компьютера)
+            cameraContainer.addEventListener('wheel', function(e) {
+                e.preventDefault();
+                
+                if (e.deltaY < 0) {
+                    // Увеличение
+                    scale *= 1.1;
+                } else {
+                    // Уменьшение
+                    scale /= 1.1;
+                }
+                
+                // Ограничиваем масштаб
+                scale = Math.min(Math.max(0.5, scale), 3);
+                
+                updateModelTransform();
+            });
+            
+            // Обработка касаний для мобильных устройств
+            cameraContainer.addEventListener('touchstart', function(e) {
+                e.preventDefault();
+                
+                if (e.touches.length === 1) {
+                    // Одно касание - начало вращения
+                    isDragging = true;
+                    previousMousePosition = {
+                        x: e.touches[0].clientX,
+                        y: e.touches[0].clientY
+                    };
+                } else if (e.touches.length === 2) {
+                    // Два касания - начало масштабирования
+                    isDragging = false;
+                    initialDistance = getDistance(
+                        e.touches[0].clientX, e.touches[0].clientY,
+                        e.touches[1].clientX, e.touches[1].clientY
+                    );
+                    initialScale = scale;
+                }
+            });
+            
+            cameraContainer.addEventListener('touchmove', function(e) {
+                e.preventDefault();
+                
+                if (e.touches.length === 1 && isDragging) {
+                    // Одно касание - вращение
+                    const deltaX = e.touches[0].clientX - previousMousePosition.x;
+                    const deltaY = e.touches[0].clientY - previousMousePosition.y;
+                    
+                    rotation.y += deltaX * 0.5;
+                    rotation.x += deltaY * 0.5;
+                    
+                    previousMousePosition = {
+                        x: e.touches[0].clientX,
+                        y: e.touches[0].clientY
+                    };
+                    
+                    updateModelTransform();
+                } else if (e.touches.length === 2) {
+                    // Два касания - масштабирование
+                    const currentDistance = getDistance(
+                        e.touches[0].clientX, e.touches[0].clientY,
+                        e.touches[1].clientX, e.touches[1].clientY
+                    );
+                    
+                    if (initialDistance !== null) {
+                        scale = initialScale * (currentDistance / initialDistance);
+                        // Ограничиваем масштаб
+                        scale = Math.min(Math.max(0.5, scale), 3);
+                        updateModelTransform();
+                    }
+                }
+            });
+            
+            cameraContainer.addEventListener('touchend', function(e) {
+                if (e.touches.length === 0) {
+                    // Все касания завершены
+                    isDragging = false;
+                    initialDistance = null;
+                } else if (e.touches.length === 1) {
+                    // Осталось одно касание - переключаемся в режим вращения
+                    isDragging = true;
+                    previousMousePosition = {
+                        x: e.touches[0].clientX,
+                        y: e.touches[0].clientY
+                    };
+                }
+            });
+            
+            // Функция для вычисления расстояния между двумя точками
+            function getDistance(x1, y1, x2, y2) {
+                return Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
             }
             
-            console.log('Страница загружена, готов к работе');
-        });
-
-        // Обработка ошибок
-        window.addEventListener('error', function(e) {
-            console.error('Global error:', e.error);
-            updateStatus('Произошла ошибка: ' + e.error.message);
+            // Обновление трансформации модели
+            function updateModelTransform() {
+                model.style.transform = `rotateX(${rotation.x}deg) rotateY(${rotation.y}deg) scale(${scale})`;
+            }
+            
+            // Инициализация модели
+            updateModelTransform();
         });
     </script>
 </body>
-
 </html>
-
