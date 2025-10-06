@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AR 3D модель с камерой</title>
+    <title>AR 3D модель Neil Armstrong</title>
+    <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.4.0/model-viewer.min.js"></script>
     <style>
         * {
             margin: 0;
@@ -99,66 +100,18 @@
         }
         
         .model-container {
-            width: 200px;
-            height: 200px;
+            width: 100%;
+            height: 100%;
             display: flex;
             align-items: center;
             justify-content: center;
-            perspective: 1000px;
         }
         
-        .model {
-            width: 150px;
-            height: 150px;
-            position: relative;
-            transform-style: preserve-3d;
-            transition: transform 0.1s;
+        model-viewer {
+            width: 300px;
+            height: 300px;
+            --progress-bar-color: transparent;
             pointer-events: auto;
-        }
-        
-        .face {
-            position: absolute;
-            width: 150px;
-            height: 150px;
-            background: rgba(255, 255, 255, 0.8);
-            border: 2px solid rgba(255, 255, 255, 0.9);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.2rem;
-            color: #333;
-            backface-visibility: visible;
-            font-weight: bold;
-        }
-        
-        .front {
-            transform: translateZ(75px);
-            background: rgba(74, 144, 226, 0.9);
-        }
-        
-        .back {
-            transform: rotateY(180deg) translateZ(75px);
-            background: rgba(226, 74, 74, 0.9);
-        }
-        
-        .right {
-            transform: rotateY(90deg) translateZ(75px);
-            background: rgba(74, 226, 144, 0.9);
-        }
-        
-        .left {
-            transform: rotateY(-90deg) translateZ(75px);
-            background: rgba(226, 144, 74, 0.9);
-        }
-        
-        .top {
-            transform: rotateX(90deg) translateZ(75px);
-            background: rgba(144, 74, 226, 0.9);
-        }
-        
-        .bottom {
-            transform: rotateX(-90deg) translateZ(75px);
-            background: rgba(226, 226, 74, 0.9);
         }
         
         .controls {
@@ -169,6 +122,7 @@
             display: flex;
             justify-content: center;
             gap: 20px;
+            z-index: 10;
         }
         
         .control-btn {
@@ -227,55 +181,69 @@
             border: 1px solid rgba(255, 100, 100, 0.5);
         }
         
+        .loading {
+            display: none;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-size: 1.2rem;
+            text-align: center;
+            z-index: 5;
+        }
+        
+        .loading-spinner {
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top: 4px solid white;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
         @media (max-width: 768px) {
             .camera-container {
                 height: 400px;
             }
             
-            .model {
-                width: 120px;
-                height: 120px;
+            model-viewer {
+                width: 250px;
+                height: 250px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .camera-container {
+                height: 350px;
             }
             
-            .face {
-                width: 120px;
-                height: 120px;
-                font-size: 1rem;
+            model-viewer {
+                width: 200px;
+                height: 200px;
             }
             
-            .front, .back, .right, .left, .top, .bottom {
-                transform-origin: center;
+            .controls {
+                flex-direction: column;
+                align-items: center;
+                gap: 10px;
             }
             
-            .front {
-                transform: translateZ(60px);
-            }
-            
-            .back {
-                transform: rotateY(180deg) translateZ(60px);
-            }
-            
-            .right {
-                transform: rotateY(90deg) translateZ(60px);
-            }
-            
-            .left {
-                transform: rotateY(-90deg) translateZ(60px);
-            }
-            
-            .top {
-                transform: rotateX(90deg) translateZ(60px);
-            }
-            
-            .bottom {
-                transform: rotateX(-90deg) translateZ(60px);
+            .control-btn {
+                width: 80%;
             }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>AR 3D модель с камерой</h1>
+        <h1>AR 3D модель Neil Armstrong</h1>
         <p>Нажмите на кнопку, чтобы открыть камеру с 3D моделью</p>
         
         <button class="btn" id="openCameraBtn">Открыть камеру</button>
@@ -283,21 +251,32 @@
         <div class="camera-container" id="cameraContainer">
             <video id="videoElement" autoplay playsinline></video>
             
+            <div class="loading" id="loadingIndicator">
+                <div class="loading-spinner"></div>
+                Загрузка модели...
+            </div>
+            
             <div class="model-overlay">
                 <div class="model-container">
-                    <div class="model" id="model">
-                        <div class="face front">Перед</div>
-                        <div class="face back">Зад</div>
-                        <div class="face right">Прав</div>
-                        <div class="face left">Лев</div>
-                        <div class="face top">Верх</div>
-                        <div class="face bottom">Низ</div>
-                    </div>
+                    <model-viewer 
+                        id="modelViewer"
+                        src="https://modelviewer.dev/shared-assets/models/NeilArmstrong.glb"
+                        alt="3D модель Neil Armstrong"
+                        camera-controls
+                        auto-rotate
+                        ar
+                        shadow-intensity="1"
+                        environment-image="neutral"
+                        exposure="1.0"
+                        camera-orbit="0deg 75deg 105%"
+                        field-of-view="30deg">
+                    </model-viewer>
                 </div>
             </div>
             
             <div class="controls">
-                <button class="control-btn" id="resetBtn">Сбросить</button>
+                <button class="control-btn" id="rotateToggleBtn">Вращение: ВКЛ</button>
+                <button class="control-btn" id="resetBtn">Сбросить вид</button>
                 <button class="control-btn" id="closeBtn">Закрыть камеру</button>
             </div>
         </div>
@@ -317,7 +296,8 @@
             <ul>
                 <li><strong>На компьютере:</strong> перетаскивайте мышью для вращения, колесо мыши для масштабирования</li>
                 <li><strong>На телефоне:</strong> одним пальцем вращайте, двумя пальцами масштабируйте</li>
-                <li>Нажмите "Сбросить" для возврата к исходному виду</li>
+                <li>Кнопка "Вращение" включает/выключает автоматическое вращение</li>
+                <li>Кнопка "Сбросить вид" возвращает модель к исходному положению</li>
                 <li>Модель отображается поверх видео с камеры в реальном времени</li>
             </ul>
         </div>
@@ -328,20 +308,16 @@
             const openCameraBtn = document.getElementById('openCameraBtn');
             const cameraContainer = document.getElementById('cameraContainer');
             const videoElement = document.getElementById('videoElement');
-            const model = document.getElementById('model');
+            const modelViewer = document.getElementById('modelViewer');
+            const rotateToggleBtn = document.getElementById('rotateToggleBtn');
             const resetBtn = document.getElementById('resetBtn');
             const closeBtn = document.getElementById('closeBtn');
             const permissionMessage = document.getElementById('permissionMessage');
             const cameraError = document.getElementById('cameraError');
+            const loadingIndicator = document.getElementById('loadingIndicator');
             
-            let isDragging = false;
-            let previousMousePosition = { x: 0, y: 0 };
-            let initialDistance = null;
-            let initialScale = 1;
-            
-            let rotation = { x: -20, y: 20 };
-            let scale = 1;
             let stream = null;
+            let isAutoRotate = true;
             
             // Открытие камеры
             openCameraBtn.addEventListener('click', function() {
@@ -356,12 +332,17 @@
                 cameraError.style.display = 'none';
             });
             
-            // Сброс модели
+            // Переключение автоматического вращения
+            rotateToggleBtn.addEventListener('click', function() {
+                isAutoRotate = !isAutoRotate;
+                modelViewer.autoRotate = isAutoRotate;
+                rotateToggleBtn.textContent = isAutoRotate ? 'Вращение: ВКЛ' : 'Вращение: ВЫКЛ';
+            });
+            
+            // Сброс вида модели
             resetBtn.addEventListener('click', function() {
-                rotation.x = -20;
-                rotation.y = 20;
-                scale = 1;
-                updateModelTransform();
+                modelViewer.cameraOrbit = '0deg 75deg 105%';
+                modelViewer.fieldOfView = '30deg';
             });
             
             // Запуск камеры
@@ -370,8 +351,9 @@
                     // Скрываем сообщения об ошибках
                     permissionMessage.style.display = 'none';
                     cameraError.style.display = 'none';
+                    loadingIndicator.style.display = 'block';
                     
-                    // Запрашиваем доступ к камере
+                    // Запрашиваем доступ к камеру
                     stream = await navigator.mediaDevices.getUserMedia({ 
                         video: { 
                             facingMode: 'environment',
@@ -386,11 +368,23 @@
                     // Показываем контейнер с камерой
                     cameraContainer.style.display = 'block';
                     
-                    // Обновляем трансформацию модели
-                    updateModelTransform();
+                    // Ждем загрузки модели
+                    modelViewer.addEventListener('load', function() {
+                        loadingIndicator.style.display = 'none';
+                    });
+                    
+                    // Обработка ошибок загрузки модели
+                    modelViewer.addEventListener('error', function() {
+                        loadingIndicator.innerHTML = `
+                            <div style="color: #ff6b6b; font-size: 2rem;">⚠️</div>
+                            Ошибка загрузки модели<br>
+                            <small>Проверьте подключение к интернету</small>
+                        `;
+                    });
                     
                 } catch (error) {
                     console.error('Ошибка доступа к камере:', error);
+                    loadingIndicator.style.display = 'none';
                     
                     if (error.name === 'NotAllowedError') {
                         permissionMessage.style.display = 'block';
@@ -413,130 +407,53 @@
                 videoElement.srcObject = null;
             }
             
-            // Вращение модели мышью (для компьютера)
-            cameraContainer.addEventListener('mousedown', function(e) {
-                isDragging = true;
-                previousMousePosition = {
-                    x: e.clientX,
-                    y: e.clientY
-                };
+            // Остановка камеры при закрытии страницы
+            window.addEventListener('beforeunload', function() {
+                stopCamera();
             });
             
-            document.addEventListener('mousemove', function(e) {
-                if (isDragging) {
-                    const deltaX = e.clientX - previousMousePosition.x;
-                    const deltaY = e.clientY - previousMousePosition.y;
-                    
-                    rotation.y += deltaX * 0.5;
-                    rotation.x += deltaY * 0.5;
-                    
-                    previousMousePosition = {
-                        x: e.clientX,
-                        y: e.clientY
-                    };
-                    
-                    updateModelTransform();
-                }
-            });
+            // Добавляем обработку жестов для мобильных устройств
+            let initialDistance = null;
+            let initialZoom = 1;
             
-            document.addEventListener('mouseup', function() {
-                isDragging = false;
-            });
-            
-            // Масштабирование колесом мыши (для компьютера)
-            cameraContainer.addEventListener('wheel', function(e) {
-                e.preventDefault();
-                
-                if (e.deltaY < 0) {
-                    scale *= 1.1;
-                } else {
-                    scale /= 1.1;
-                }
-                
-                scale = Math.min(Math.max(0.3, scale), 3);
-                updateModelTransform();
-            });
-            
-            // Обработка касаний для мобильных устройств
             cameraContainer.addEventListener('touchstart', function(e) {
-                e.preventDefault();
-                
-                if (e.touches.length === 1) {
-                    isDragging = true;
-                    previousMousePosition = {
-                        x: e.touches[0].clientX,
-                        y: e.touches[0].clientY
-                    };
-                } else if (e.touches.length === 2) {
-                    isDragging = false;
+                if (e.touches.length === 2) {
+                    // Запоминаем начальное расстояние для масштабирования
                     initialDistance = getDistance(
                         e.touches[0].clientX, e.touches[0].clientY,
                         e.touches[1].clientX, e.touches[1].clientY
                     );
-                    initialScale = scale;
+                    initialZoom = parseFloat(modelViewer.getAttribute('camera-orbit').split(' ')[2].replace('%', '')) / 100;
                 }
             });
             
             cameraContainer.addEventListener('touchmove', function(e) {
-                e.preventDefault();
-                
-                if (e.touches.length === 1 && isDragging) {
-                    const deltaX = e.touches[0].clientX - previousMousePosition.x;
-                    const deltaY = e.touches[0].clientY - previousMousePosition.y;
-                    
-                    rotation.y += deltaX * 0.5;
-                    rotation.x += deltaY * 0.5;
-                    
-                    previousMousePosition = {
-                        x: e.touches[0].clientX,
-                        y: e.touches[0].clientY
-                    };
-                    
-                    updateModelTransform();
-                } else if (e.touches.length === 2) {
+                if (e.touches.length === 2 && initialDistance !== null) {
+                    // Вычисляем текущее расстояние между пальцами
                     const currentDistance = getDistance(
                         e.touches[0].clientX, e.touches[0].clientY,
                         e.touches[1].clientX, e.touches[1].clientY
                     );
                     
-                    if (initialDistance !== null) {
-                        scale = initialScale * (currentDistance / initialDistance);
-                        scale = Math.min(Math.max(0.3, scale), 3);
-                        updateModelTransform();
-                    }
+                    // Вычисляем коэффициент масштабирования
+                    const zoomFactor = currentDistance / initialDistance;
+                    const newZoom = Math.min(Math.max(initialZoom * zoomFactor, 0.5), 2);
+                    
+                    // Обновляем масштаб модели
+                    const orbit = modelViewer.getAttribute('camera-orbit').split(' ');
+                    orbit[2] = `${newZoom * 100}%`;
+                    modelViewer.cameraOrbit = orbit.join(' ');
                 }
             });
             
-            cameraContainer.addEventListener('touchend', function(e) {
-                if (e.touches.length === 0) {
-                    isDragging = false;
-                    initialDistance = null;
-                } else if (e.touches.length === 1) {
-                    isDragging = true;
-                    previousMousePosition = {
-                        x: e.touches[0].clientX,
-                        y: e.touches[0].clientY
-                    };
-                }
+            cameraContainer.addEventListener('touchend', function() {
+                initialDistance = null;
             });
             
             // Функция для вычисления расстояния между двумя точками
             function getDistance(x1, y1, x2, y2) {
                 return Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
             }
-            
-            // Обновление трансформации модели
-            function updateModelTransform() {
-                model.style.transform = `rotateX(${rotation.x}deg) rotateY(${rotation.y}deg) scale(${scale})`;
-            }
-            
-            // Инициализация модели
-            updateModelTransform();
-            
-            // Остановка камеры при закрытии страницы
-            window.addEventListener('beforeunload', function() {
-                stopCamera();
-            });
         });
     </script>
 </body>
