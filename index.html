@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AR 3D модель Neil Armstrong</title>
+    <title>AR 3D модель Светильник</title>
     <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.4.0/model-viewer.min.js"></script>
     <style>
         * {
@@ -23,26 +23,25 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
             color: white;
-            padding: 20px;
+            padding: 15px;
         }
         
         .container {
-            max-width: 800px;
             width: 100%;
+            max-width: 1200px;
             text-align: center;
         }
         
         h1 {
-            font-size: 2.5rem;
-            margin-bottom: 10px;
+            font-size: 2.2rem;
+            margin-bottom: 8px;
             text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
         }
         
         p {
-            font-size: 1.2rem;
-            margin-bottom: 30px;
+            font-size: 1.1rem;
+            margin-bottom: 20px;
             opacity: 0.9;
         }
         
@@ -50,19 +49,19 @@
             background: #ff6b6b;
             color: white;
             border: none;
-            padding: 15px 40px;
-            font-size: 1.2rem;
+            padding: 12px 30px;
+            font-size: 1rem;
             border-radius: 50px;
             cursor: pointer;
             transition: all 0.3s ease;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-            margin-bottom: 30px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            margin-bottom: 20px;
         }
         
         .btn:hover {
             background: #ff5252;
-            transform: translateY(-3px);
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
         }
         
         .btn:active {
@@ -71,11 +70,13 @@
         
         .camera-container {
             width: 100%;
-            height: 500px;
-            border-radius: 20px;
+            height: 75vh;
+            min-height: 500px;
+            max-height: 800px;
+            border-radius: 15px;
             overflow: hidden;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
-            margin-top: 20px;
+            margin-top: 15px;
             display: none;
             position: relative;
         }
@@ -108,51 +109,55 @@
         }
         
         model-viewer {
-            width: 300px;
-            height: 300px;
+            width: 400px;
+            height: 400px;
             --progress-bar-color: transparent;
             pointer-events: auto;
         }
         
         .controls {
             position: absolute;
-            bottom: 20px;
+            bottom: 15px;
             left: 0;
             right: 0;
             display: flex;
             justify-content: center;
-            gap: 20px;
+            gap: 12px;
             z-index: 10;
         }
         
         .control-btn {
-            background: rgba(255, 255, 255, 0.3);
+            background: rgba(255, 255, 255, 0.25);
             color: white;
             border: none;
-            padding: 12px 25px;
-            border-radius: 50px;
+            padding: 8px 16px;
+            border-radius: 25px;
             cursor: pointer;
             transition: all 0.3s ease;
             backdrop-filter: blur(10px);
-            font-weight: bold;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            font-weight: 500;
+            font-size: 0.85rem;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+            min-width: 100px;
         }
         
         .control-btn:hover {
-            background: rgba(255, 255, 255, 0.4);
+            background: rgba(255, 255, 255, 0.35);
         }
         
         .instructions {
             margin-top: 20px;
             background: rgba(255, 255, 255, 0.1);
-            padding: 15px;
+            padding: 12px;
             border-radius: 10px;
             text-align: left;
-            max-width: 500px;
+            max-width: 600px;
+            font-size: 0.9rem;
         }
         
         .instructions h3 {
-            margin-bottom: 10px;
+            margin-bottom: 8px;
+            font-size: 1.1rem;
         }
         
         .instructions ul {
@@ -160,25 +165,28 @@
         }
         
         .instructions li {
-            margin-bottom: 8px;
+            margin-bottom: 6px;
+            line-height: 1.4;
         }
         
         .permission-message {
             display: none;
             background: rgba(255, 0, 0, 0.2);
-            padding: 15px;
+            padding: 12px;
             border-radius: 10px;
-            margin-top: 20px;
+            margin-top: 15px;
             border: 1px solid rgba(255, 100, 100, 0.5);
+            font-size: 0.9rem;
         }
         
         .camera-error {
             display: none;
             background: rgba(255, 0, 0, 0.2);
-            padding: 15px;
+            padding: 12px;
             border-radius: 10px;
-            margin-top: 20px;
+            margin-top: 15px;
             border: 1px solid rgba(255, 100, 100, 0.5);
+            font-size: 0.9rem;
         }
         
         .loading {
@@ -188,17 +196,20 @@
             left: 50%;
             transform: translate(-50%, -50%);
             color: white;
-            font-size: 1.2rem;
+            font-size: 1rem;
             text-align: center;
             z-index: 5;
+            background: rgba(0, 0, 0, 0.6);
+            padding: 20px;
+            border-radius: 15px;
         }
         
         .loading-spinner {
-            border: 4px solid rgba(255, 255, 255, 0.3);
+            border: 3px solid rgba(255, 255, 255, 0.3);
             border-radius: 50%;
-            border-top: 4px solid white;
-            width: 40px;
-            height: 40px;
+            border-top: 3px solid white;
+            width: 30px;
+            height: 30px;
             animation: spin 1s linear infinite;
             margin: 0 auto 10px;
         }
@@ -210,41 +221,83 @@
         
         @media (max-width: 768px) {
             .camera-container {
-                height: 400px;
+                height: 70vh;
+                min-height: 450px;
             }
             
             model-viewer {
-                width: 250px;
-                height: 250px;
+                width: 320px;
+                height: 320px;
+            }
+            
+            h1 {
+                font-size: 1.8rem;
+            }
+            
+            p {
+                font-size: 1rem;
+            }
+            
+            .controls {
+                flex-wrap: wrap;
+                bottom: 10px;
+            }
+            
+            .control-btn {
+                font-size: 0.8rem;
+                padding: 7px 14px;
+                min-width: 90px;
             }
         }
         
         @media (max-width: 480px) {
             .camera-container {
-                height: 350px;
+                height: 65vh;
+                min-height: 400px;
             }
             
             model-viewer {
-                width: 200px;
-                height: 200px;
+                width: 280px;
+                height: 280px;
+            }
+            
+            h1 {
+                font-size: 1.6rem;
             }
             
             .controls {
-                flex-direction: column;
-                align-items: center;
-                gap: 10px;
+                gap: 8px;
             }
             
             .control-btn {
-                width: 80%;
+                font-size: 0.75rem;
+                padding: 6px 12px;
+                min-width: 80px;
+            }
+            
+            .instructions {
+                font-size: 0.85rem;
+                padding: 10px;
+            }
+        }
+
+        @media (min-height: 900px) {
+            .camera-container {
+                height: 80vh;
+                max-height: 900px;
+            }
+            
+            model-viewer {
+                width: 450px;
+                height: 450px;
             }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>AR 3D модель Neil Armstrong</h1>
-        <p>Нажмите на кнопку, чтобы открыть камеру с 3D моделью</p>
+        <h1>AR 3D модель Светильник</h1>
+        <p>Сосал?</p>
         
         <button class="btn" id="openCameraBtn">Открыть камеру</button>
         
@@ -260,8 +313,8 @@
                 <div class="model-container">
                     <model-viewer 
                         id="modelViewer"
-                        src="https://modelviewer.dev/shared-assets/models/NeilArmstrong.glb"
-                        alt="3D модель Neil Armstrong"
+                        src="/светильник 70,1.glb"
+                        alt="3D модель Светильник"
                         camera-controls
                         auto-rotate
                         ar
@@ -275,9 +328,9 @@
             </div>
             
             <div class="controls">
-                <button class="control-btn" id="rotateToggleBtn">Вращение: ВКЛ</button>
-                <button class="control-btn" id="resetBtn">Сбросить вид</button>
-                <button class="control-btn" id="closeBtn">Закрыть камеру</button>
+                <button class="control-btn" id="rotateToggleBtn">Вращение</button>
+                <button class="control-btn" id="resetBtn">Сбросить</button>
+                <button class="control-btn" id="closeBtn">Закрыть</button>
             </div>
         </div>
         
@@ -297,7 +350,7 @@
                 <li><strong>На компьютере:</strong> перетаскивайте мышью для вращения, колесо мыши для масштабирования</li>
                 <li><strong>На телефоне:</strong> одним пальцем вращайте, двумя пальцами масштабируйте</li>
                 <li>Кнопка "Вращение" включает/выключает автоматическое вращение</li>
-                <li>Кнопка "Сбросить вид" возвращает модель к исходному положению</li>
+                <li>Кнопка "Сбросить" возвращает модель к исходному положению</li>
                 <li>Модель отображается поверх видео с камеры в реальном времени</li>
             </ul>
         </div>
@@ -336,7 +389,10 @@
             rotateToggleBtn.addEventListener('click', function() {
                 isAutoRotate = !isAutoRotate;
                 modelViewer.autoRotate = isAutoRotate;
-                rotateToggleBtn.textContent = isAutoRotate ? 'Вращение: ВКЛ' : 'Вращение: ВЫКЛ';
+                rotateToggleBtn.textContent = isAutoRotate ? 'Вращение ✓' : 'Вращение';
+                rotateToggleBtn.style.background = isAutoRotate 
+                    ? 'rgba(100, 255, 100, 0.3)' 
+                    : 'rgba(255, 255, 255, 0.25)';
             });
             
             // Сброс вида модели
@@ -353,12 +409,12 @@
                     cameraError.style.display = 'none';
                     loadingIndicator.style.display = 'block';
                     
-                    // Запрашиваем доступ к камеру
+                    // Запрашиваем доступ к камере
                     stream = await navigator.mediaDevices.getUserMedia({ 
                         video: { 
                             facingMode: 'environment',
-                            width: { ideal: 1280 },
-                            height: { ideal: 720 }
+                            width: { ideal: 1920 },
+                            height: { ideal: 1080 }
                         } 
                     });
                     
@@ -376,7 +432,7 @@
                     // Обработка ошибок загрузки модели
                     modelViewer.addEventListener('error', function() {
                         loadingIndicator.innerHTML = `
-                            <div style="color: #ff6b6b; font-size: 2rem;">⚠️</div>
+                            <div style="color: #ff6b6b; font-size: 1.5rem;">⚠️</div>
                             Ошибка загрузки модели<br>
                             <small>Проверьте подключение к интернету</small>
                         `;
@@ -411,49 +467,6 @@
             window.addEventListener('beforeunload', function() {
                 stopCamera();
             });
-            
-            // Добавляем обработку жестов для мобильных устройств
-            let initialDistance = null;
-            let initialZoom = 1;
-            
-            cameraContainer.addEventListener('touchstart', function(e) {
-                if (e.touches.length === 2) {
-                    // Запоминаем начальное расстояние для масштабирования
-                    initialDistance = getDistance(
-                        e.touches[0].clientX, e.touches[0].clientY,
-                        e.touches[1].clientX, e.touches[1].clientY
-                    );
-                    initialZoom = parseFloat(modelViewer.getAttribute('camera-orbit').split(' ')[2].replace('%', '')) / 100;
-                }
-            });
-            
-            cameraContainer.addEventListener('touchmove', function(e) {
-                if (e.touches.length === 2 && initialDistance !== null) {
-                    // Вычисляем текущее расстояние между пальцами
-                    const currentDistance = getDistance(
-                        e.touches[0].clientX, e.touches[0].clientY,
-                        e.touches[1].clientX, e.touches[1].clientY
-                    );
-                    
-                    // Вычисляем коэффициент масштабирования
-                    const zoomFactor = currentDistance / initialDistance;
-                    const newZoom = Math.min(Math.max(initialZoom * zoomFactor, 0.5), 2);
-                    
-                    // Обновляем масштаб модели
-                    const orbit = modelViewer.getAttribute('camera-orbit').split(' ');
-                    orbit[2] = `${newZoom * 100}%`;
-                    modelViewer.cameraOrbit = orbit.join(' ');
-                }
-            });
-            
-            cameraContainer.addEventListener('touchend', function() {
-                initialDistance = null;
-            });
-            
-            // Функция для вычисления расстояния между двумя точками
-            function getDistance(x1, y1, x2, y2) {
-                return Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
-            }
         });
     </script>
 </body>
